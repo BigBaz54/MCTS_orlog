@@ -30,15 +30,10 @@ class Player():
                 rolled_dice.append('Helmet')
         self.rolled_dice = rolled_dice
     
-    def random_move(self):
-        if (self.turns_played == 2):
-            # last turn, save all dice
-            for d in self.rolled_dice:
-                self.save_dice(d)
-        else:
-            for d in self.rolled_dice:
-                if (random.random() < 0.5):
-                    self.save_dice(d)
+    def do_move(self, move):
+        for dice in move:
+            self.save_dice(dice)
+        self.turns_played += 1
     
     def save_dice(self, dice):
         self.saved_dice.append(dice)
@@ -46,15 +41,24 @@ class Player():
     def get_dice_saved_number(self):
         return len(self.saved_dice)
     
-    def random_turn(self):
-        self.roll_dice()
-        self.random_move()
-        self.turns_played += 1
+    def get_legal_moves(self):
+        if self.turns_played == 2:
+            # last turn, the only legal move is to save all dice
+            return [self.rolled_dice.copy()]
+        moves = []
+        # legal moves are all subsets of rolled_dice
+        for i in range(2 ** len(self.rolled_dice)):
+            move = []
+            for j in range(len(self.rolled_dice)):
+                if (i >> j) % 2 == 1:
+                    move.append(self.rolled_dice[j])
+            moves.append(move)
+        return moves
 
 class Game():
     def __init__(self, player1=Player(), player2=Player()):
         self.current_player = 0
-        self.players = [player1, player2]
+        self.players = (player1, player2)
 
 
 
@@ -62,7 +66,10 @@ class Game():
 if __name__ == '__main__':
     game = Game()
     for __ in range(3):
-        game.players[0].random_turn()
-        game.players[1].random_turn()
+        game.players[0].roll_dice()
+        print(game.players[0].rolled_dice)
+        print(game.players[0].get_legal_moves())
+        game.players[0].do_move(random.choice(game.players[0].get_legal_moves()))
         print(game.players[0])
-        print(game.players[1])
+        print()
+
