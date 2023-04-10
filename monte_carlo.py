@@ -6,7 +6,7 @@ class MonteCarlo():
         self.game = game
         self.states = []
         self.max_time_seconds = max_time_seconds
-        # dictionary of states and their win rates
+        # dictionaries of states with their win and play counts
         self.played = {}
         self.won = {}
 
