@@ -60,16 +60,65 @@ class Game():
         self.current_player = 0
         self.players = (player1, player2)
 
+    def winner(self):
+        if self.players[0].hp <= 0:
+            return 1
+        if self.players[1].hp <= 0:
+            return 0
+        return -1
+    
+    def get_legal_moves(self):
+        return self.players[self.current_player].get_legal_moves()
+    
+    def do_move(self, move):
+        self.players[self.current_player].do_move(move)
+        if self.players[0].turns_played == 3 and self.players[1].turns_played == 3:
+            # both players have played 3 turns, it's time to calculate the hp loss
+            for player in [0,1]:
+                for dice in self.players[player].saved_dice:
+                    if dice == 'Arrow':
+                        if 'Shield' in self.players[1 - player].saved_dice:
+                            self.players[1 - player].saved_dice.remove('Shield')
+                        else:
+                            self.players[1 - player].hp -= 1
+                    elif dice == 'Axe':
+                        if 'Helmet' in self.players[1 - player].saved_dice:
+                            self.players[1 - player].saved_dice.remove('Helmet')
+                        else:
+                            self.players[1 - player].hp -= 1
+            # reset the game
+            self.players[0].saved_dice = []
+            self.players[1].saved_dice = []
+            self.players[0].turns_played = 0
+            self.players[1].turns_played = 0
+        else:
+            # switch the current player
+            self.current_player = 1 - self.current_player
 
-
+    def __str__(self):
+        return f'Game with players:\n{self.players[0]}\n{self.players[1]}'
+    
+    def is_over(self):
+        return self.winner() != -1
+    
+    def get_state(self):
+        # doesn't include players' hp neither the turns played
+        return (tuple(self.players[0].saved_dice), tuple(self.players[1].saved_dice))
+    
+    def get_current_player(self):
+        return self.current_player
 
 if __name__ == '__main__':
     game = Game()
-    for __ in range(3):
-        game.players[0].roll_dice()
-        print(game.players[0].rolled_dice)
-        print(game.players[0].get_legal_moves())
-        game.players[0].do_move(random.choice(game.players[0].get_legal_moves()))
-        print(game.players[0])
+    for _ in range(6):
+        print(game)
+        game.players[game.current_player].roll_dice()
+        move = random.choice(game.get_legal_moves())
+        print(f'\nPlayer {game.get_current_player()} plays {move}')
+        game.do_move(move)
         print()
+        print()
+    print(game)
+
+        
 
