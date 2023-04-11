@@ -54,6 +54,9 @@ class Player():
                     move.append(self.rolled_dice[j])
             moves.append(move)
         return moves
+    
+    def copy(self):
+        return Player(self.hp, self.rolled_dice.copy(), self.saved_dice.copy(), self.turns_played)
 
 class Game():
     def __init__(self, player1=Player(), player2=Player()):
@@ -107,6 +110,9 @@ class Game():
     
     def get_current_player(self):
         return self.current_player
+
+    def copy(self):
+        return Game(self.players[0].copy(), self.players[1].copy())
 
 if __name__ == '__main__':
     game = Game()
