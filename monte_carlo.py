@@ -15,6 +15,8 @@ class MonteCarlo():
         self.won = {}
 
     def get_best_move(self):
+        # depth of the deeper state TRACKED,
+        # the actual depths of the simulations that go to the end of the game are way higher
         self.max_depth = 0
         player = self.game.get_current_player()
         print("Player to play", player)
@@ -130,7 +132,7 @@ if __name__ == "__main__":
 
     # play a game between two monte carlo bots
     g = game.Game()
-    bot = MonteCarlo(g, max_time_seconds=5, exploration_param=1.4)
+    bot = MonteCarlo(g, max_time_seconds=5, exploration_param=1)
     while not g.is_over():
         g.players[g.current_player].roll_dice()
         
