@@ -59,8 +59,8 @@ class Player():
         return Player(self.hp, self.rolled_dice.copy(), self.saved_dice.copy(), self.turns_played)
 
 class Game():
-    def __init__(self, player1=Player(), player2=Player()):
-        self.current_player = 0
+    def __init__(self, player1=Player(), player2=Player(), current_player=0):
+        self.current_player = current_player
         self.players = (player1, player2)
 
     def winner(self):
@@ -75,6 +75,8 @@ class Game():
     
     def do_move(self, move):
         self.players[self.current_player].do_move(move)
+
+    def end_turn(self):
         if self.players[0].turns_played == 3 and self.players[1].turns_played == 3:
             # both players have played 3 turns, it's time to calculate the hp loss
             for player in [0,1]:
@@ -92,9 +94,12 @@ class Game():
             # reset the game
             self.players[0].saved_dice = []
             self.players[1].saved_dice = []
+            self.players[0].rolled_dice = []
+            self.players[1].rolled_dice = []
             self.players[0].turns_played = 0
             self.players[1].turns_played = 0
         else:
+            self.players[self.current_player].rolled_dice = []
             # switch the current player
             self.current_player = 1 - self.current_player
 
@@ -112,7 +117,7 @@ class Game():
         return self.current_player
 
     def copy(self):
-        return Game(self.players[0].copy(), self.players[1].copy())
+        return Game(self.players[0].copy(), self.players[1].copy(), self.current_player)
 
 if __name__ == '__main__':
     game = Game()
@@ -120,8 +125,9 @@ if __name__ == '__main__':
         print(game)
         game.players[game.current_player].roll_dice()
         move = random.choice(game.get_legal_moves())
-        print(f'\nPlayer {game.get_current_player()} plays {move}')
         game.do_move(move)
+        print(f'\nPlayer {game.get_current_player()} plays {move}')
+        game.end_turn()
         print()
         print()
     print(game)
