@@ -64,6 +64,8 @@ class Game():
         self.players = (player1, player2)
 
     def winner(self):
+        if self.players[0].hp <= 0 and self.players[1].hp <= 0:
+            return 2
         if self.players[0].hp <= 0:
             return 1
         if self.players[1].hp <= 0:
@@ -134,6 +136,3 @@ if __name__ == '__main__':
         print()
         print()
     print(game)
-
-        
-
