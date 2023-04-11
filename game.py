@@ -73,6 +73,9 @@ class Game():
     def get_legal_moves(self):
         return self.players[self.current_player].get_legal_moves()
     
+    def roll_dice(self):
+        self.players[self.current_player].roll_dice()
+    
     def do_move(self, move):
         self.players[self.current_player].do_move(move)
 
@@ -123,7 +126,7 @@ if __name__ == '__main__':
     game = Game()
     for _ in range(6):
         print(game)
-        game.players[game.current_player].roll_dice()
+        game.roll_dice()
         move = random.choice(game.get_legal_moves())
         game.do_move(move)
         print(f'\nPlayer {game.get_current_player()} plays {move}')
