@@ -19,8 +19,11 @@ class MonteCarlo():
 
     def get_best_move(self):
         # depth of the deeper state TRACKED,
-        # the actual depths of the simulations that go to the end of the game are way higher
         self.max_depth = 0
+        # sum of depths of the simulations that go to the end of the game
+        self.end_game_depth_total = 0
+        # average depth of the simulations that go to the end of the game
+        self.end_game_depth_average = 0
         player = self.game.get_current_player()
         print("Player to play", player)
         legal_moves = self.game.get_legal_moves()
@@ -36,7 +39,10 @@ class MonteCarlo():
         while (self.max_time_seconds is None or time.time() - begin < self.max_time_seconds) and (self.max_simulations is None or games < self.max_simulations):
             self.run_simulation()
             games += 1
-        print("Games played:", games)
+        self.simulations = games
+        self.end_game_depth_average = self.end_game_depth_total / self.simulations
+        print("Simulations:", self.simulations)
+        print("Average end game depth:", self.end_game_depth_average)
 
         # list of (move, state) tuples
         # for all legal moves and their resulting game states
@@ -122,6 +128,7 @@ class MonteCarlo():
             game.do_move(move)
             game.end_turn()
             game.roll_dice()
+        self.end_game_depth_total += depth
 
         # backpropagation
         for player, state in visited_states:
@@ -136,7 +143,7 @@ if __name__ == "__main__":
 
     # play a game between two monte carlo bots
     g = game.Game()
-    bot = MonteCarlo(g, max_time_seconds=100, max_simulations=1000, exploration_param=1)
+    bot = MonteCarlo(g, max_time_seconds=5, max_simulations=1000, exploration_param=1)
     while not g.is_over():
         g.players[g.current_player].roll_dice()
         
