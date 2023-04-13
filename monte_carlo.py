@@ -4,12 +4,15 @@ from math import log, sqrt
 
 
 class MonteCarlo():
-    def __init__(self, game, max_time_seconds=1, exploration_param=1.4):
+    def __init__(self, game, max_simulations=None, max_time_seconds=None, exploration_param=1.4):
         self.game = game
         # the greater the exploration parameter, the more the algorithm will favor unexplored moves
         self.exploration_param = exploration_param
         self.states = []
+        self.max_simulations = max_simulations
         self.max_time_seconds = max_time_seconds
+        if max_simulations is None and max_time_seconds is None:
+            raise ValueError("Either max_simulations or max_time_seconds must be set")
         # dictionaries of states with their win and play counts
         self.played = {}
         self.won = {}
@@ -30,9 +33,10 @@ class MonteCarlo():
 
         games = 0
         begin = time.time()
-        while time.time() - begin < self.max_time_seconds:
+        while (self.max_time_seconds is None or time.time() - begin < self.max_time_seconds) and (self.max_simulations is None or games < self.max_simulations):
             self.run_simulation()
             games += 1
+        print("Games played:", games)
 
         # list of (move, state) tuples
         # for all legal moves and their resulting game states
@@ -132,7 +136,7 @@ if __name__ == "__main__":
 
     # play a game between two monte carlo bots
     g = game.Game()
-    bot = MonteCarlo(g, max_time_seconds=5, exploration_param=1)
+    bot = MonteCarlo(g, max_time_seconds=100, max_simulations=1000, exploration_param=1)
     while not g.is_over():
         g.players[g.current_player].roll_dice()
         
