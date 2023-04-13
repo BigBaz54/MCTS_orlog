@@ -44,16 +44,16 @@ class Player():
     def get_legal_moves(self):
         if self.turns_played == 2:
             # last turn, the only legal move is to save all dice
-            return [self.rolled_dice.copy()]
+            return [tuple(self.rolled_dice.copy())]
         moves = []
-        # legal moves are all subsets of rolled_dice
+        # adding all sorted subsets of rolled_dice to a set to remove duplicates
         for i in range(2 ** len(self.rolled_dice)):
             move = []
             for j in range(len(self.rolled_dice)):
                 if (i >> j) % 2 == 1:
                     move.append(self.rolled_dice[j])
-            moves.append(move)
-        return moves
+            moves.append(tuple(sorted(move)))
+        return list(set(moves))
     
     def copy(self):
         return Player(self.hp, self.rolled_dice.copy(), self.saved_dice.copy(), self.turns_played)
