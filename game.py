@@ -59,7 +59,7 @@ class Player():
         return Player(self.hp, self.rolled_dice.copy(), self.saved_dice.copy(), self.turns_played)
 
 class Game():
-    def __init__(self, player1=Player(), player2=Player(), current_player=0):
+    def __init__(self, player1=Player(), player2=Player(), current_player=random.randint(0, 1)):
         self.current_player = current_player
         self.players = (player1, player2)
 
