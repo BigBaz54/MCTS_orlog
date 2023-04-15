@@ -84,7 +84,7 @@ class MonteCarlo():
         visited_states = set()
         expand = True
         move_num = 0
-        while not game.is_over() and move_num < 10000:
+        while not game.is_over() and move_num < 1000:
             move_num += 1
             depth+=1
             player = game.get_current_player()
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     import game
 
     # play a game between two monte carlo bots
-    g = game.Game()
+    g = game.Game(max_rerolls=3, max_hp=15)
     bot = MonteCarlo(g, max_time_seconds=5, max_simulations=1000, exploration_param=1)
     while not g.is_over():
         g.players[g.current_player].roll_dice()
@@ -155,3 +155,4 @@ if __name__ == "__main__":
         print("Player 0:", g.players[0].hp)
         print("Player 1:", g.players[1].hp)
         print()
+    print("Winner:", g.winner())

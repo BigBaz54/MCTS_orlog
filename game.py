@@ -2,7 +2,7 @@ import random
 
 
 class Player():
-    def __init__(self, hp=15, rolled_dice=None, saved_dice=None, turns_played=0):
+    def __init__(self, hp=15, rolled_dice=None, saved_dice=None, turns_played=0, max_rerolls=3):
         if saved_dice is None:
             saved_dice = []
         if rolled_dice is None:
@@ -11,6 +11,7 @@ class Player():
         self.rolled_dice = rolled_dice
         self.saved_dice = saved_dice
         self.turns_played = turns_played
+        self.max_rerolls = max_rerolls
 
     def __str__(self):
         return f'\nPlayer with {self.hp} HP\nSaved dice : {self.saved_dice}\nTurns played : {self.turns_played}'
@@ -42,7 +43,7 @@ class Player():
         return len(self.saved_dice)
     
     def get_legal_moves(self):
-        if self.turns_played == 2:
+        if self.turns_played == self.max_rerolls-1:
             # last turn, the only legal move is to save all dice
             return [tuple(self.rolled_dice.copy())]
         moves = []
@@ -59,9 +60,10 @@ class Player():
         return Player(self.hp, self.rolled_dice.copy(), self.saved_dice.copy(), self.turns_played)
 
 class Game():
-    def __init__(self, player1=Player(), player2=Player(), current_player=random.randint(0, 1)):
+    def __init__(self, player1=None, player2=None, current_player=random.randint(0, 1), max_rerolls=3, max_hp=15):
         self.current_player = current_player
-        self.players = (player1, player2)
+        self.players = (player1 or Player(max_rerolls=max_rerolls, hp=max_hp), player2 or Player(max_rerolls=max_rerolls, hp=max_hp))
+        self.max_rerolls = max_rerolls
 
     def winner(self):
         if self.players[0].hp <= 0 and self.players[1].hp <= 0:
@@ -82,8 +84,8 @@ class Game():
         self.players[self.current_player].do_move(move)
 
     def end_turn(self):
-        if self.players[0].turns_played == 3 and self.players[1].turns_played == 3:
-            # both players have played 3 turns, it's time to calculate the hp loss
+        if self.players[0].turns_played == self.max_rerolls and self.players[1].turns_played == self.max_rerolls:
+            # both players have played the max number of turns, it's time to calculate the hp loss
             for player in [0,1]:
                 for dice in self.players[player].saved_dice:
                     if dice == 'Arrow':
