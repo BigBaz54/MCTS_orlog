@@ -50,13 +50,16 @@ class SettingsView(CTkFrame):
 
     def switch_view(self):
         self.destroy()
-        game = game.Game()
-        self.app.show_game(game)
+        new_game = game.Game(max_hp=int(self.hp_entry.get() or 15), max_rerolls=int(self.reroll_entry.get() or 3))
+        bot = monte_carlo.MonteCarlo(new_game, exploration_param=float(self.exp_entry.get() or 1.4), max_simulations=int(self.games_entry.get() or 1000), max_time_seconds=float(self.time_entry.get() or 5))
+        self.app.show_game(new_game, bot)
 
 class GameView(CTkFrame):
-    def __init__(self, app, game):
+    def __init__(self, app, game, bot):
         super().__init__(master=app)
         self.app = app
+        self.game = game
+        self.bot = bot
 
         self.left_frame = CTkFrame(master=self, fg_color="lightblue")
         self.left_frame.pack(side="left", fill="both", expand=True)
@@ -93,9 +96,9 @@ class App(CTk):
         self.center_window(500, 500)
         SettingsView(app=self).place(relx=0.5, rely=0.5, anchor="center")
 
-    def show_game(self, game):
+    def show_game(self, game, bot):
         self.center_window(1200, 600)
-        GameView(app=self, game=game).pack(expand=True, fill="both")
+        GameView(app=self, game=game, bot=bot).pack(expand=True, fill="both")
 
     def center_window(self, w, h):
         # resize the window and center it on the screen
