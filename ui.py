@@ -108,12 +108,68 @@ class GameView(CTkFrame):
         self.left_frame = CTkFrame(master=self)
         self.left_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
         self.left_frame.grid_columnconfigure(0, weight=1)
+        self.left_frame.grid_columnconfigure(1, weight=1)
+        self.left_frame.grid_rowconfigure(0, weight=1)
+        self.left_frame.grid_rowconfigure(5, weight=1)
 
-        self.lbl = CTkLabel(self.left_frame, text="Game view!")
-        self.lbl.grid(row=0, column=0, columnspan=2, sticky="nsew", pady=5, padx=5)
+        # new game button
+        self.new_game_button = CTkButton(self.left_frame, text="New game", command=self.switch_view, width=40, font=('Helvetica', 15))
+        self.new_game_button.place(x=5, y=5, anchor="nw")
 
-        self.btn = CTkButton(self.left_frame, text="Switch to settings view", command=self.switch_view)
-        self.btn.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=5, padx=5)
+        # turn label
+        self.turn_var = tk.StringVar()
+        self.player_var = tk.StringVar()
+        self.turn_label = CTkLabel(self.left_frame, text=f"Turn {self.turn_var.get()}: {self.player_var.get()}", font=('Helvetica', 15))
+        self.turn_label.grid(row=1, column=0, columnspan=2, pady=5, padx=5)
+
+        # rolled dice frame
+        self.rolled_dice_frame = CTkFrame(self.left_frame)
+        self.rolled_dice_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=5, padx=50)
+        self.rolled_dice_frame.grid_columnconfigure(0, weight=1)
+        self.rolled_dice_frame.grid_columnconfigure(7, weight=1)
+
+        self.rolled_dice_label = CTkLabel(self.rolled_dice_frame, text="Rolled dice:", font=('Helvetica', 15))
+        self.rolled_dice_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
+
+        # temp dice buttons
+        CTkButton(self.rolled_dice_frame, text="1", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=1, pady=5, padx=5)
+        CTkButton(self.rolled_dice_frame, text="2", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=2, pady=5, padx=5)
+        CTkButton(self.rolled_dice_frame, text="3", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=3, pady=5, padx=5)
+        CTkButton(self.rolled_dice_frame, text="4", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=4, pady=5, padx=5)
+        CTkButton(self.rolled_dice_frame, text="5", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=5, pady=5, padx=5)
+        CTkButton(self.rolled_dice_frame, text="6", width=75, height=75, font=('Helvetica', 15)).grid(row=1, column=6, pady=5, padx=5)
+
+        # confirm/roll button
+        self.confirm_roll_var = tk.StringVar(value="Roll dice")
+        self.confirm_roll_button = CTkButton(self.left_frame, text=self.confirm_roll_var.get(), width=40, font=('Helvetica', 20))
+        self.confirm_roll_button.grid(row=3, column=0, columnspan=2, pady=5, padx=5)
+
+        # player's info
+        self.player_frame = CTkFrame(self.left_frame)
+        self.player_frame.grid(row=4, column=0, sticky="nsew", pady=5, padx=5)
+        self.player_frame.grid_columnconfigure(0, weight=1)
+        self.player_frame.grid_columnconfigure(7, weight=1)
+
+        self.player_hp_var = tk.StringVar()
+        self.player_hp_label = CTkLabel(self.player_frame, text="HP: "+self.player_hp_var.get(), font=('Helvetica', 15))
+        self.player_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
+
+        CTkButton(self.player_frame, text="1", width=50, height=50, font=('Helvetica', 15), state="disabled").grid(row=1, column=1, pady=5, padx=5)
+        CTkButton(self.player_frame, text="2", width=50, height=50, font=('Helvetica', 15), state="disabled").grid(row=1, column=2, pady=5, padx=5)
+        CTkButton(self.player_frame, text="3", width=50, height=50, font=('Helvetica', 15), state="disabled").grid(row=1, column=3, pady=5, padx=5)
+
+        # bot's info
+        self.bot_frame = CTkFrame(self.left_frame)
+        self.bot_frame.grid(row=4, column=1, sticky="nsew", pady=5, padx=5)
+        self.bot_frame.grid_columnconfigure(0, weight=1)
+        self.bot_frame.grid_columnconfigure(7, weight=1)
+
+        self.bot_hp_var = tk.StringVar()
+        self.bot_hp_label = CTkLabel(self.bot_frame, text="HP: "+self.bot_hp_var.get(), font=('Helvetica', 15))
+        self.bot_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
+
+        CTkButton(self.bot_frame, text="1", width=50, height=50, font=('Helvetica', 15), state="disabled").grid(row=1, column=1, pady=5, padx=5)
+        CTkButton(self.bot_frame, text="2", width=50, height=50, font=('Helvetica', 15), state="disabled").grid(row=1, column=2, pady=5, padx=5)
 
 
 
