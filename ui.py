@@ -1,4 +1,5 @@
 from customtkinter import *
+import tkinter as tk
 import monte_carlo
 import game
 
@@ -61,19 +62,63 @@ class GameView(CTkFrame):
         self.game = game
         self.bot = bot
 
-        self.left_frame = CTkFrame(master=self, fg_color="lightblue")
-        self.left_frame.pack(side="left", fill="both", expand=True)
+        # configure main grid to have the left panel (game) and the right panel (bot)
+        self.grid_configure(column=2, row=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-        self.right_frame = CTkFrame(master=self, fg_color="purple")
-        self.right_frame.pack(side="right", fill="both", expand=True)
-        
-        # Create a label widget
+        # right panel
+        self.right_frame = CTkFrame(master=self)
+        self.right_frame.grid(row=0, column=1, sticky="nsew", padx=5, pady=5)
+        self.right_frame.grid_columnconfigure(0, weight=1)
+        self.right_frame.grid_columnconfigure(1, weight=1)
+        self.right_frame.grid_rowconfigure(0, weight=1)
+        self.right_frame.grid_rowconfigure(5, weight=1)
+
+        # informations about the search
+        self.games_var = tk.StringVar()
+        self.games_label = CTkLabel(self.right_frame, text="Games simulated: "+self.games_var.get(), font=('Helvetica', 15))
+        self.games_label.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
+
+        self.time_var = tk.StringVar()
+        self.time_label = CTkLabel(self.right_frame, text="Search time: "+self.time_var.get()+"s", font=('Helvetica', 15))
+        self.time_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
+
+        # scrollable frame to display the moves and their informations
+        self.scrollable_frame = CTkScrollableFrame(self.right_frame, width=400, height=400)
+        self.scrollable_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=10, padx=15)
+        self.scrollable_frame.grid_columnconfigure(1, weight=1)
+        self.nb_moves_var = tk.StringVar()
+        self.nb_moves_label = CTkLabel(self.scrollable_frame, text=self.nb_moves_var.get()+" legal moves:", font=('Helvetica', 15))
+        self.nb_moves_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
+        self.moves_var = tk.StringVar(value="('Arrow', 'Arrow', 'Arrow', 'Axe', 'Axe', 'Helmet'): 26.32% (5 / 19)\nteydfga\nazery\ntestaryzt\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\n")
+        self.moves_label = CTkLabel(self.scrollable_frame, text=self.moves_var.get(), font=('Helvetica', 13), justify="left")
+        self.moves_label.grid(row=2, column=1, sticky="w", pady=5, padx=5)
+
+        # results of the search
+        self.depth_var = tk.StringVar()
+        self.depth_label = CTkLabel(self.right_frame, text="Average depth: "+self.depth_var.get(), font=('Helvetica', 15))
+        self.depth_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(10,5), padx=50)
+
+        self.move_var = tk.StringVar()
+        self.move_label = CTkLabel(self.right_frame, text="Move selected: "+self.move_var.get(), font=('Helvetica', 15))
+        self.move_label.grid(row=4, column=0, columnspan=2, sticky="w", pady=5, padx=50)
+
+        # left panel
+        self.left_frame = CTkFrame(master=self)
+        self.left_frame.grid(row=0, column=0, sticky="nsew", padx=5, pady=5)
+        self.left_frame.grid_columnconfigure(0, weight=1)
+
         self.lbl = CTkLabel(self.left_frame, text="Game view!")
-        self.lbl.pack()
+        self.lbl.grid(row=0, column=0, columnspan=2, sticky="nsew", pady=5, padx=5)
 
-        # Create a button widget
         self.btn = CTkButton(self.left_frame, text="Switch to settings view", command=self.switch_view)
-        self.btn.pack()
+        self.btn.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=5, padx=5)
+
+
+
+
+        
 
     def switch_view(self):
         self.destroy()
@@ -98,7 +143,7 @@ class App(CTk):
 
     def show_game(self, game, bot):
         self.center_window(1200, 600)
-        GameView(app=self, game=game, bot=bot).pack(expand=True, fill="both")
+        GameView(app=self, game=game, bot=bot).place(relx=0.5, rely=0.5, anchor="center", relwidth=1, relheight=1)
 
     def center_window(self, w, h):
         # resize the window and center it on the screen
