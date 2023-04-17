@@ -68,15 +68,19 @@ class GameView(CTkFrame):
         self.app = app
         self.game = game
         self.bot = bot
+        self.rolled_dice = []
+        self.rolled_dice_buttons = []
+        # list of 0 or 1, 1 if the dice is selected
+        self.selected_dice = []
 
         self.arrow_img = CTkImage(Image.open('assets/img/arrow.png'), size=(75, 75))
         self.helmet_img = CTkImage(Image.open('assets/img/helmet.png'), size=(75, 75))
         self.axe_img = CTkImage(Image.open('assets/img/axe.png'), size=(75, 75))
         self.shield_img = CTkImage(Image.open('assets/img/shield.png'), size=(75, 75))
-        self.little_arrow_img = CTkImage(Image.open('assets/img/arrow.png'), size=(50, 50))
-        self.little_helmet_img = CTkImage(Image.open('assets/img/helmet.png'), size=(50, 50))
-        self.little_axe_img = CTkImage(Image.open('assets/img/axe.png'), size=(50, 50))
-        self.little_shield_img = CTkImage(Image.open('assets/img/shield.png'), size=(50, 50))
+        self.little_arrow_img = CTkImage(Image.open('assets/img/arrow.png'), size=(30, 30))
+        self.little_helmet_img = CTkImage(Image.open('assets/img/helmet.png'), size=(30, 30))
+        self.little_axe_img = CTkImage(Image.open('assets/img/axe.png'), size=(30, 30))
+        self.little_shield_img = CTkImage(Image.open('assets/img/shield.png'), size=(30, 30))
 
         # configure main grid to have the left panel (game) and the right panel (bot)
         self.grid_configure(column=2, row=1)
@@ -92,32 +96,32 @@ class GameView(CTkFrame):
         self.right_frame.grid_rowconfigure(5, weight=1)
 
         # informations about the search
-        self.games_var = tk.StringVar()
-        self.games_label = CTkLabel(self.right_frame, text="Games simulated: "+self.games_var.get(), font=('Helvetica', 15))
+        self.games_var = tk.StringVar(value="Games simulated: ")
+        self.games_label = CTkLabel(self.right_frame, textvariable=self.games_var, font=('Helvetica', 15))
         self.games_label.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
 
-        self.time_var = tk.StringVar()
-        self.time_label = CTkLabel(self.right_frame, text="Search time: "+self.time_var.get()+"s", font=('Helvetica', 15))
+        self.time_var = tk.StringVar(value="Search time: s")
+        self.time_label = CTkLabel(self.right_frame, textvariable=self.time_var, font=('Helvetica', 15))
         self.time_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
 
         # scrollable frame to display the moves and their informations
         self.scrollable_frame = CTkScrollableFrame(self.right_frame, width=400, height=400)
         self.scrollable_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=10, padx=15)
         self.scrollable_frame.grid_columnconfigure(1, weight=1)
-        self.nb_moves_var = tk.StringVar()
-        self.nb_moves_label = CTkLabel(self.scrollable_frame, text=self.nb_moves_var.get()+" legal moves:", font=('Helvetica', 15))
+        self.nb_moves_var = tk.StringVar(value=" legal moves:")
+        self.nb_moves_label = CTkLabel(self.scrollable_frame, textvariable=self.nb_moves_var, font=('Helvetica', 15))
         self.nb_moves_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
         self.moves_var = tk.StringVar(value="('Arrow', 'Arrow', 'Arrow', 'Axe', 'Axe', 'Helmet'): 26.32% (5 / 19)\nteydfga\nazery\ntestaryzt\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\n")
-        self.moves_label = CTkLabel(self.scrollable_frame, text=self.moves_var.get(), font=('Helvetica', 13), justify="left")
+        self.moves_label = CTkLabel(self.scrollable_frame, textvariable=self.moves_var, font=('Helvetica', 13), justify="left")
         self.moves_label.grid(row=2, column=1, sticky="w", pady=5, padx=5)
 
         # results of the search
-        self.depth_var = tk.StringVar()
-        self.depth_label = CTkLabel(self.right_frame, text="Average depth: "+self.depth_var.get(), font=('Helvetica', 15))
+        self.depth_var = tk.StringVar(value="Average depth: ")
+        self.depth_label = CTkLabel(self.right_frame, textvariable=self.depth_var, font=('Helvetica', 15))
         self.depth_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(10,5), padx=50)
 
-        self.move_var = tk.StringVar()
-        self.move_label = CTkLabel(self.right_frame, text="Move selected: "+self.move_var.get(), font=('Helvetica', 15))
+        self.move_var = tk.StringVar(value="Move selected: ")
+        self.move_label = CTkLabel(self.right_frame, textvariable=self.move_var, font=('Helvetica', 15))
         self.move_label.grid(row=4, column=0, columnspan=2, sticky="w", pady=5, padx=50)
 
         # left panel
@@ -133,32 +137,25 @@ class GameView(CTkFrame):
         self.new_game_button.place(x=5, y=5, anchor="nw")
 
         # turn label
-        self.turn_var = tk.StringVar()
-        self.player_var = tk.StringVar()
-        self.turn_label = CTkLabel(self.left_frame, text=f"Turn {self.turn_var.get()}: {self.player_var.get()}", font=('Helvetica', 20))
-        self.turn_label.grid(row=1, column=0, columnspan=2, pady=5, padx=5)
+        self.turn_player_var = tk.StringVar(value="Turn 1: Bot")
+        self.turn_label = CTkLabel(self.left_frame, textvariable=self.turn_player_var, font=('Helvetica', 25))
+        self.turn_label.grid(row=1, column=0, columnspan=2, pady=(50, 20))
 
         # rolled dice frame
         self.rolled_dice_frame = CTkFrame(self.left_frame)
-        self.rolled_dice_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=5, padx=50)
+        self.rolled_dice_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=5, padx=10)
         self.rolled_dice_frame.grid_columnconfigure(0, weight=1)
         self.rolled_dice_frame.grid_columnconfigure(7, weight=1)
 
         self.rolled_dice_label = CTkLabel(self.rolled_dice_frame, text="Rolled dice:", font=('Helvetica', 20))
-        self.rolled_dice_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
+        self.rolled_dice_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=(20,0), padx=5)
 
-        # temp dice buttons
-        CTkButton(self.rolled_dice_frame, text="", image=self.arrow_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=1, pady=5, padx=5)
-        CTkButton(self.rolled_dice_frame, text="", image=self.helmet_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=2, pady=5, padx=5)
-        CTkButton(self.rolled_dice_frame, text="", image=self.arrow_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=3, pady=5, padx=5)
-        CTkButton(self.rolled_dice_frame, text="", image=self.shield_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=4, pady=5, padx=5)
-        CTkButton(self.rolled_dice_frame, text="", image=self.axe_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=5, pady=5, padx=5)
-        CTkButton(self.rolled_dice_frame, text="", image=self.arrow_img, width=75, height=75, fg_color="#eeeee4", hover_color="#c9c9c3").grid(row=1, column=6, pady=5, padx=5)
+        # label to set heigth of the frame
+        CTkLabel(self.rolled_dice_frame, text="", height=170).grid(row=1, column=0, sticky="nsew")
 
         # confirm/roll button
-        self.confirm_roll_var = tk.StringVar(value="Roll dice")
-        self.confirm_roll_button = CTkButton(self.left_frame, text=self.confirm_roll_var.get(), width=40, font=('Helvetica', 20))
-        self.confirm_roll_button.grid(row=3, column=0, columnspan=2, pady=5, padx=5)
+        self.confirm_roll_button = CTkButton(self.left_frame, text="Roll dice", width=40, font=('Helvetica', 30), command=self.roll_dice)
+        self.confirm_roll_button.grid(row=3, column=0, columnspan=2, pady=35)
 
         # player's info
         self.player_frame = CTkFrame(self.left_frame)
@@ -166,12 +163,15 @@ class GameView(CTkFrame):
         self.player_frame.grid_columnconfigure(0, weight=1)
         self.player_frame.grid_columnconfigure(7, weight=1)
 
-        self.player_hp_var = tk.StringVar()
-        self.player_hp_label = CTkLabel(self.player_frame, text="HP: "+self.player_hp_var.get(), font=('Helvetica', 18))
+        self.player_hp_var = tk.StringVar(value="HP: ")
+        self.player_hp_label = CTkLabel(self.player_frame, textvariable=self.player_hp_var, font=('Helvetica', 18), width=250)
         self.player_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
 
-        CTkButton(self.player_frame, text="", image=self.little_arrow_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
-        CTkButton(self.player_frame, text="", image=self.little_shield_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
+        # label to set heigth of the frame
+        CTkLabel(self.player_frame, text="", height=100).grid(row=1, column=0, sticky="nsew")
+
+        CTkButton(self.player_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
+        CTkButton(self.player_frame, text="", image=self.little_shield_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
 
         # bot's info
         self.bot_frame = CTkFrame(self.left_frame)
@@ -179,14 +179,17 @@ class GameView(CTkFrame):
         self.bot_frame.grid_columnconfigure(0, weight=1)
         self.bot_frame.grid_columnconfigure(7, weight=1)
 
-        self.bot_hp_var = tk.StringVar()
-        self.bot_hp_label = CTkLabel(self.bot_frame, text="HP: "+self.bot_hp_var.get(), font=('Helvetica', 18))
+        # label to set heigth of the frame
+        CTkLabel(self.bot_frame, text="", height=100).grid(row=1, column=0, sticky="nsew")
+
+        self.bot_hp_var = tk.StringVar(value="HP: ")
+        self.bot_hp_label = CTkLabel(self.bot_frame, textvariable=self.bot_hp_var, font=('Helvetica', 18), width=250)
         self.bot_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
 
-        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_helmet_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=2, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=3, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_shield_img, width=50, height=50, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
+        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
+        CTkButton(self.bot_frame, text="", image=self.little_helmet_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=2, pady=5, padx=5)
+        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=3, pady=5, padx=5)
+        CTkButton(self.bot_frame, text="", image=self.little_shield_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
 
 
 
@@ -196,6 +199,48 @@ class GameView(CTkFrame):
     def switch_view(self):
         self.destroy()
         self.app.show_settings()
+
+    def roll_dice(self):
+        self.game.roll_dice()
+        self.rolled_dice = self.game.players[self.game.current_player].rolled_dice
+        self.update_rolled_dice()
+        self.confirm_roll_button.configure(text="Confirm")
+        self.confirm_roll_button.configure(command=self.confirm)
+    
+    def update_rolled_dice(self):
+        for e in (self.rolled_dice_buttons):
+            e.destroy()
+        self.rolled_dice_buttons = []
+        for i in range(len(self.rolled_dice)):
+            if (self.rolled_dice[i]=="Arrow"):
+                img = self.arrow_img
+            elif (self.rolled_dice[i]=="Axe"):
+                img = self.axe_img
+            elif (self.rolled_dice[i]=="Shield"):
+                img = self.shield_img
+            elif (self.rolled_dice[i]=="Helmet"):
+                img = self.helmet_img
+            self.rolled_dice_buttons.append(CTkButton(self.rolled_dice_frame, text="", image=img, width=75, height=75, fg_color="#eeeee4", border_color="#ff7575", hover_color="#c9c9c3", border_width=3, command=lambda i=i: self.toggle_dice(i)))
+            self.rolled_dice_buttons[i].grid(row=1, column=i+1, pady=5, padx=5)
+            self.selected_dice.append(0)
+
+    def confirm(self):
+        self.play_move()
+        self.end_turn()
+
+    def play_move(self):
+        pass
+
+    def end_turn(self):
+        pass
+
+    def toggle_dice(self, i):
+        if (self.selected_dice[i]==1):
+            self.selected_dice[i] = 0
+            self.rolled_dice_buttons[i].configure(border_color="#ff7575")
+        else:
+            self.selected_dice[i] = 1
+            self.rolled_dice_buttons[i].configure(border_color="#9fff75")
 
 class App(CTk):
     def __init__(self):
