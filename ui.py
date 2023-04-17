@@ -120,11 +120,11 @@ class GameView(CTkFrame):
         # results of the search
         self.depth_var = tk.StringVar(value="Average depth: ")
         self.depth_label = CTkLabel(self.right_frame, textvariable=self.depth_var, font=('Helvetica', 15))
-        self.depth_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(10,5), padx=50)
+        self.depth_label.grid(row=3, column=0, columnspan=2, sticky="w", pady=(10,5), padx=(50,10))
 
         self.move_var = tk.StringVar(value="Move selected: ")
         self.move_label = CTkLabel(self.right_frame, textvariable=self.move_var, font=('Helvetica', 15))
-        self.move_label.grid(row=4, column=0, columnspan=2, sticky="w", pady=5, padx=50)
+        self.move_label.grid(row=4, column=0, columnspan=2, sticky="w", pady=5, padx=(50,10))
 
         # left panel
         self.left_frame = CTkFrame(master=self)
@@ -247,6 +247,9 @@ class GameView(CTkFrame):
         self.selected_dice = []
         self.update_rolled_dice()
         self.update_saved_dice()
+        if (self.game.is_over()):
+            self.end_game()
+            return()
         if (self.game.current_player==1):
             self.do_bot_turn()
             self.update_bot_logs()
@@ -320,6 +323,20 @@ class GameView(CTkFrame):
         nb_moves = moves_logs.split("\n")[0]
         self.nb_moves_var.set(nb_moves)
         self.moves_var.set(moves_logs.split("\n", 1)[1])
+
+    def end_game(self):
+        game_over_text = ""
+        if (self.game.winner()==0):
+            game_over_text = "You won!"
+        elif (self.game.winner()==1):
+            game_over_text = "You lost!"
+        elif (self.game.winner()==2):
+            game_over_text = "It's a tie!"
+        self.rolled_dice_label.destroy()
+        self.turn_player_var.set("")
+        CTkLabel(self.rolled_dice_frame, text=game_over_text, font=('Helvetica', 40), text_color="#eeeee4").grid(row=1, column=0, columnspan=8, pady=5, padx=5)
+        self.confirm_roll_button.configure(text="End Game")
+        self.confirm_roll_button.configure(command=self.switch_view)
 
 class App(CTk):
     def __init__(self):
