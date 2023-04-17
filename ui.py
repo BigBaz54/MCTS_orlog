@@ -72,6 +72,8 @@ class GameView(CTkFrame):
         self.rolled_dice_buttons = []
         # list of 0 or 1, 1 if the dice is selected
         self.selected_dice = []
+        self.player_dice_buttons = []
+        self.bot_dice_buttons = []
 
         self.arrow_img = CTkImage(Image.open('assets/img/arrow.png'), size=(75, 75))
         self.helmet_img = CTkImage(Image.open('assets/img/helmet.png'), size=(75, 75))
@@ -170,9 +172,6 @@ class GameView(CTkFrame):
         # label to set heigth of the frame
         CTkLabel(self.player_frame, text="", height=100).grid(row=1, column=0, sticky="nsew")
 
-        CTkButton(self.player_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
-        CTkButton(self.player_frame, text="", image=self.little_shield_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
-
         # bot's info
         self.bot_frame = CTkFrame(self.left_frame)
         self.bot_frame.grid(row=4, column=1, sticky="nsew", pady=5, padx=5)
@@ -185,12 +184,6 @@ class GameView(CTkFrame):
         self.bot_hp_var = tk.StringVar(value="Bot HP: "+str(self.game.players[1].hp))
         self.bot_hp_label = CTkLabel(self.bot_frame, textvariable=self.bot_hp_var, font=('Helvetica', 18), width=250)
         self.bot_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
-
-        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=1, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_helmet_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=2, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_arrow_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=3, pady=5, padx=5)
-        CTkButton(self.bot_frame, text="", image=self.little_shield_img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4").grid(row=1, column=4, pady=5, padx=5)
-
         
     def start(self):
         if (self.game.current_player==1):
@@ -241,6 +234,8 @@ class GameView(CTkFrame):
 
     def play_move(self, move):
         self.game.do_move(move)
+        self.update_saved_dice()
+
 
     def end_turn(self):
         self.game.end_turn()
@@ -250,6 +245,7 @@ class GameView(CTkFrame):
         self.rolled_dice = []
         self.selected_dice = []
         self.update_rolled_dice()
+        self.update_saved_dice()
         if (self.game.current_player==1 or self.game.players[0].turns_played==2):
             self.do_bot_turn()
         else:
@@ -278,6 +274,38 @@ class GameView(CTkFrame):
         else:
             self.selected_dice[i] = 1
             self.rolled_dice_buttons[i].configure(border_color="#9fff75")
+
+    def update_saved_dice(self):
+        player_dice = self.game.players[0].saved_dice
+        bot_dice = self.game.players[1].saved_dice
+        for e in (self.player_dice_buttons):
+            e.destroy()
+        for e in (self.bot_dice_buttons):
+            e.destroy()
+        self.player_dice_buttons = []
+        self.bot_dice_buttons = []
+        for i in range(len(player_dice)):
+            if (player_dice[i]=="Arrow"):
+                img = self.little_arrow_img
+            elif (player_dice[i]=="Axe"):
+                img = self.little_axe_img
+            elif (player_dice[i]=="Shield"):
+                img = self.little_shield_img
+            elif (player_dice[i]=="Helmet"):
+                img = self.little_helmet_img
+            self.player_dice_buttons.append(CTkButton(self.player_frame, text="", image=img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4"))
+            self.player_dice_buttons[i].grid(row=1, column=i+1, pady=5, padx=5)
+        for i in range(len(bot_dice)):
+            if (bot_dice[i]=="Arrow"):
+                img = self.little_arrow_img
+            elif (bot_dice[i]=="Axe"):
+                img = self.little_axe_img
+            elif (bot_dice[i]=="Shield"):
+                img = self.little_shield_img
+            elif (bot_dice[i]=="Helmet"):
+                img = self.little_helmet_img
+            self.bot_dice_buttons.append(CTkButton(self.bot_frame, text="", image=img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4"))
+            self.bot_dice_buttons[i].grid(row=1, column=i+1, pady=5, padx=5)
 
 class App(CTk):
     def __init__(self):
