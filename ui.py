@@ -163,7 +163,7 @@ class GameView(CTkFrame):
         self.player_frame.grid_columnconfigure(0, weight=1)
         self.player_frame.grid_columnconfigure(7, weight=1)
 
-        self.player_hp_var = tk.StringVar(value="HP: ")
+        self.player_hp_var = tk.StringVar(value="HP: "+str(self.game.players[0].hp))
         self.player_hp_label = CTkLabel(self.player_frame, textvariable=self.player_hp_var, font=('Helvetica', 18), width=250)
         self.player_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
 
@@ -182,7 +182,7 @@ class GameView(CTkFrame):
         # label to set heigth of the frame
         CTkLabel(self.bot_frame, text="", height=100).grid(row=1, column=0, sticky="nsew")
 
-        self.bot_hp_var = tk.StringVar(value="HP: ")
+        self.bot_hp_var = tk.StringVar(value="HP: "+str(self.game.players[1].hp))
         self.bot_hp_label = CTkLabel(self.bot_frame, textvariable=self.bot_hp_var, font=('Helvetica', 18), width=250)
         self.bot_hp_label.grid(row=0, column=0, columnspan=8, sticky="nsew", pady=5, padx=5)
 
@@ -225,14 +225,28 @@ class GameView(CTkFrame):
             self.selected_dice.append(0)
 
     def confirm(self):
-        self.play_move()
+        move = []
+        for i in range(len(self.selected_dice)):
+            if (self.selected_dice[i]==1):
+                move.append(self.rolled_dice[i])
+        self.play_move(move)
         self.end_turn()
 
-    def play_move(self):
-        pass
+    def play_move(self, move):
+        self.game.do_move(move)
 
     def end_turn(self):
-        pass
+        self.game.end_turn()
+        self.player_hp_var.set("HP: " + str(self.game.players[0].hp))
+        self.bot_hp_var.set("HP: " + str(self.game.players[1].hp))
+        self.confirm_roll_button.configure(text="Roll Dice")
+        self.confirm_roll_button.configure(command=self.roll_dice)
+        self.turn_player_var.set(f"Turn {self.game.players[self.game.current_player].turns_played+1}: {'Player' if (self.game.current_player==0) else 'Bot'}")
+        self.rolled_dice = []
+        self.selected_dice = []
+        self.update_rolled_dice()
+
+
 
     def toggle_dice(self, i):
         if (self.selected_dice[i]==1):
