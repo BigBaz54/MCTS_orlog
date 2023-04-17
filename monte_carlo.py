@@ -32,6 +32,9 @@ class MonteCarlo():
         if not legal_moves:
             return None
         if len(legal_moves) == 1:
+            self.search_time = 0
+            self.simulations = 0
+            self.moves_logs = "1 legal move:\n" + str(legal_moves[0])
             return legal_moves[0]
 
         games = 0
@@ -39,6 +42,7 @@ class MonteCarlo():
         while (self.max_time_seconds is None or time.time() - begin < self.max_time_seconds) and (self.max_simulations is None or games < self.max_simulations):
             self.run_simulation()
             games += 1
+        self.search_time = time.time() - begin
         self.simulations = games
         self.end_game_depth_average = self.end_game_depth_total / self.simulations
         print("Simulations:", self.simulations)
@@ -62,6 +66,8 @@ class MonteCarlo():
         print("Best moves:", best_moves)
         best_move = random.choice(best_moves)
 
+        self.moves_logs = f"{len(legal_moves)} legal moves:"
+
         # display the stats for each possible play
         for x in sorted(
             ((100 * self.won.get((player, s), 0) / self.played.get((player, s), 1),
@@ -72,6 +78,7 @@ class MonteCarlo():
             reverse=True
         ):
             print("{3}: {0:.2f}% ({1} / {2})".format(*x))
+            self.moves_logs+="\n{3}: {0:.2f}% ({1} / {2})".format(*x)
 
         print("Maximum depth searched:", self.max_depth)
 
