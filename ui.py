@@ -98,11 +98,11 @@ class GameView(CTkFrame):
         self.right_frame.grid_rowconfigure(5, weight=1)
 
         # informations about the search
-        self.games_var = tk.StringVar(value="Games simulated: ")
+        self.games_var = tk.StringVar(value="Games simulated:    ")
         self.games_label = CTkLabel(self.right_frame, textvariable=self.games_var, font=('Helvetica', 15))
         self.games_label.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
 
-        self.time_var = tk.StringVar(value="Search time: s")
+        self.time_var = tk.StringVar(value="Search time:    ")
         self.time_label = CTkLabel(self.right_frame, textvariable=self.time_var, font=('Helvetica', 15))
         self.time_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
 
@@ -110,10 +110,10 @@ class GameView(CTkFrame):
         self.scrollable_frame = CTkScrollableFrame(self.right_frame, width=400, height=400)
         self.scrollable_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=10, padx=15)
         self.scrollable_frame.grid_columnconfigure(1, weight=1)
-        self.nb_moves_var = tk.StringVar(value=" legal moves:")
+        self.nb_moves_var = tk.StringVar(value="")
         self.nb_moves_label = CTkLabel(self.scrollable_frame, textvariable=self.nb_moves_var, font=('Helvetica', 15))
         self.nb_moves_label.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
-        self.moves_var = tk.StringVar(value="('Arrow', 'Arrow', 'Arrow', 'Axe', 'Axe', 'Helmet'): 26.32% (5 / 19)\nteydfga\nazery\ntestaryzt\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\ntest\nteydfga\nazery\n")
+        self.moves_var = tk.StringVar(value="")
         self.moves_label = CTkLabel(self.scrollable_frame, textvariable=self.moves_var, font=('Helvetica', 13), justify="left")
         self.moves_label.grid(row=2, column=1, sticky="w", pady=5, padx=5)
 
@@ -188,6 +188,7 @@ class GameView(CTkFrame):
     def start(self):
         if (self.game.current_player==1):
             self.do_bot_turn()
+            self.update_bot_logs()
         else:
             self.confirm_roll_button.configure(text="Roll dice")
             self.confirm_roll_button.configure(command=self.roll_dice)
@@ -246,7 +247,10 @@ class GameView(CTkFrame):
         self.selected_dice = []
         self.update_rolled_dice()
         self.update_saved_dice()
-        if (self.game.current_player==1 or self.game.players[0].turns_played==2):
+        if (self.game.current_player==1):
+            self.do_bot_turn()
+            self.update_bot_logs()
+        elif (self.game.players[0].turns_played==2):
             self.do_bot_turn()
         else:
             self.confirm_roll_button.configure(text="Roll Dice")
@@ -257,10 +261,10 @@ class GameView(CTkFrame):
         # disable all buttons during bot turn
         for e in (self.rolled_dice_buttons):
             e.configure(state="disabled")
-        bot_move = self.bot.get_best_move()
+        self.bot_move = self.bot.get_best_move()
 
         # display the move selected by the bot
-        for e in (bot_move):
+        for e in (self.bot_move):
             for but in (self.rolled_dice_buttons):
                 if (self.selected_dice[self.rolled_dice_buttons.index(but)]==0):
                     if (but.cget("image")==self.arrow_img and e=="Arrow" or but.cget("image")==self.axe_img and e=="Axe" or but.cget("image")==self.shield_img and e=="Shield" or but.cget("image")==self.helmet_img and e=="Helmet"):
@@ -306,6 +310,16 @@ class GameView(CTkFrame):
                 img = self.little_helmet_img
             self.bot_dice_buttons.append(CTkButton(self.bot_frame, text="", image=img, width=30, height=30, fg_color="#eeeee4", hover_color="#eeeee4"))
             self.bot_dice_buttons[i].grid(row=1, column=i+1, pady=5, padx=5)
+
+    def update_bot_logs(self):
+        self.depth_var.set(f"Average depth: {str(round(self.bot.end_game_depth_average, 2))}")
+        self.time_var.set(f"Search time: {str(round(self.bot.search_time, 2))}s")
+        self.games_var.set(f"Games played: {str(self.bot.simulations)}")
+        self.move_var.set(f"Move selected: {str(self.bot_move)}")
+        moves_logs = self.bot.moves_logs
+        nb_moves = moves_logs.split("\n")[0]
+        self.nb_moves_var.set(nb_moves)
+        self.moves_var.set(moves_logs.split("\n", 1)[1])
 
 class App(CTk):
     def __init__(self):
