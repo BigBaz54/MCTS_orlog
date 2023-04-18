@@ -1,6 +1,11 @@
 # MCTS_orlog
 The goal of this project is to implement Monte Carlo Tree Search to find the best move in a simplified version of the Orlog dice game from Assassin's Creed.
 
+## Rules 
+Each player has 6 dice. Each die has 2 sides with an axe, 2 sides with an arrow, a face with a helmet and a face with a shield. A helmet negates an axe attack and a shield negates an arrow attack.
+
+The number of health points removed from the opponent corresponds to the number of attacks not countered.
+
 ## How to run the code
 To run the code, you need to have python 3 installed on your computer.
 You also need to install the following python libraries:
